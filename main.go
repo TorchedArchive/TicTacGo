@@ -5,6 +5,17 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+var winningconditions = [][]int{
+	[]int{0, 1, 2},
+	[]int{0, 3, 6},
+	[]int{0, 4, 8},
+	[]int{1, 4, 7},
+	[]int{2, 4, 6},
+	[]int{2, 5, 8},
+	[]int{3, 4, 6},
+	[]int{6, 7, 8},
+}
+
 // ok ok ill clean it up later
 func main() {
 	err := termbox.Init()
@@ -51,7 +62,11 @@ loop:
 			case p := <-place:
 				if playing == true {
 					if player == "X" { player = "O" } else { player = "X" }
-					play(board, p, player)
+					if state := play(board, p, player); state == "w" {
+						fmt.Printf("\n%s won! Press Space to restart.", player)
+						playing = false
+						board = []string{"_", "_", "_", "_", "_", "_", "_", "_", "_"}
+					}
 				}
 		}
 	}
@@ -60,9 +75,19 @@ loop:
 	fmt.Println("Goodbye!")
 }
 
-func play(board []string, place int, player string) {
+func play(board []string, place int, player string) string {
 	board[place] = player
 	displayboard(board)
+	for i := 0; i < 8; i++ {
+		condition := winningconditions[i];
+		a := board[condition[0]];
+		b := board[condition[1]];
+		c := board[condition[2]];
+
+		if a == "_" || b == "_" || c == "_" { continue }
+		if a == b && b == c { return "w" }
+	}
+	return "p"
 }
 
 func displayboard(board []string) {
